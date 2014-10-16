@@ -65,6 +65,12 @@ class SoapAction extends Action
      */
     public $serviceVar = 'ws';
     /**
+     * @var bool inverts the way {@link serviceVar} works. If set to true, the WSDL
+     * will be returned when {@link serviceVar} is set instead of the webservice 
+     * being run.
+     */
+    public $wsdlOnServiceVar = false;
+    /**
      * @var array a list of PHP classes that are declared as complex types in WSDL.
      * This should be an array with WSDL types as keys and names of PHP classes as values.
      * A PHP class can also be specified as a path alias.
@@ -114,13 +120,13 @@ class SoapAction extends Action
             $this->_service->$name = $value;
         }
 
-        if (isset($_GET[$this->serviceVar])) {
-            return $this->_service->run();
-        } else {
+        if ($this->wsdlOnServiceVar && isset($_GET[$this->serviceVar])) {
             $wsdl = $this->_service->generateWsdl();
             header('Content-Type: text/xml;charset=' . \Yii::$app->response->charset);
             header('Content-Length: ' . (function_exists('mb_strlen') ? mb_strlen($wsdl, '8bit') : strlen($wsdl)));
             return $wsdl;
+        } else {
+            return $this->_service->run();
         }
     }
 
